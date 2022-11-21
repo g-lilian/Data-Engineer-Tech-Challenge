@@ -11,9 +11,10 @@ def to_date_(col, formats=("yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy", "yyyy/MM/dd
 
 
 def main():
+    USER = os.getenv('username')
     os.environ['PYSPARK_PYTHON'] = sys.executable
     os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
-    os.environ['HADOOP_HOME'] = "C:/Users/softs/hadoop/hadoop-3.3.4"
+    os.environ['HADOOP_HOME'] = f"C:/Users/{USER}/hadoop/hadoop-3.3.4"
 
     # Run locally with 1 core
     spark = SparkSession.builder \
@@ -23,10 +24,10 @@ def main():
     sc = spark.sparkContext
 
     df = spark.read.csv("applications/applications_dataset_1.csv", header=True, inferSchema=True)
-    df.printSchema()
 
     df = df.withColumn("first_name", split(col("name"), ' ').getItem(0)) \
         .withColumn("last_name", split(col("name"), ' ').getItem(1)) \
+        .withColumn("mobile_no", regexp_extract(col("mobile_no"), "\\d+", 0)) \
         .withColumn("above_18", when(
             months_between(to_date(lit("2022-01-01"), format='yyyy-MM-dd'), to_date_(col("date_of_birth"))) > 18 * 12,
             lit(True)) \
@@ -37,7 +38,7 @@ def main():
         .select(col("first_name"), col("last_name"), col("membership_id"), col("date_of_birth"), col("email"),
             col("mobile_no"), col("above_18"))
 
-    valid_email_regex = "^[a-zA-Z0-9_]+@[a-zA-Z0-9_]+\\.(?:com|net)$"
+    valid_email_regex = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+\\.(?:com|net)$"
     # Applications with invalid dates, like 31 Feb, are not successful
     success_df = df.filter(col("date_of_birth").isNotNull()) \
         .filter(length(col("mobile_no")) == 8) \
@@ -46,6 +47,7 @@ def main():
         .filter(col("name").isNotNull())
     failure_df = df.subtract(success_df)
 
+    # Use pandas here for simplicity of writing to one csv file
     success_df.toPandas().to_csv("success/1.csv", header=True)
     failure_df.toPandas().to_csv("failure/1.csv", header=True)
 
