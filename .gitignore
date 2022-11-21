@@ -1,2 +1,5 @@
 __pycache__/
 .idea*
+section1/logs
+section1/plugins
+section1/.env
