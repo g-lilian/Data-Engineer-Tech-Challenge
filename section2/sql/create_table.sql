@@ -1,7 +1,5 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS Product (
-	product_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	product_id INT UNIQUE PRIMARY KEY,
 	product_name VARCHAR(50),
     manufacturer_name VARCHAR(50),
     cost_dollars FLOAT NOT NULL,
@@ -11,7 +9,7 @@ CREATE TABLE IF NOT EXISTS Product (
 );
 
 CREATE TABLE IF NOT EXISTS Member (
-	member_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	member_id INT UNIQUE PRIMARY KEY,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     email VARCHAR(100),
@@ -21,14 +19,9 @@ CREATE TABLE IF NOT EXISTS Member (
 );
 
 CREATE TABLE IF NOT EXISTS Transactions (
-    ts TIMESTAMP GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ts INT UNIQUE PRIMARY KEY,
 	member_id INT NOT NULL REFERENCES Member(member_id),
 	product_id INT NOT NULL REFERENCES Product(product_id),
-    cost_dollars_per_qty FLOAT NOT NULL REFERENCES Product(cost_dollars),
-    weight_kg FLOAT NOT NULL REFERENCES Product(weight_kg),
     quantity_purchased INT NOT NULL,
-    CHECK (ts <= NOW()),
     UNIQUE(member_id, product_id)
 );
-
-END;
