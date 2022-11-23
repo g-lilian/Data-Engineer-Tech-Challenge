@@ -10,7 +10,7 @@ def to_date_(col, formats=("yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy", "yyyy/MM/dd
     return coalesce(*[to_date(col, f) for f in formats])
 
 
-def main():
+def process_applications():
     USER = os.getenv('username')
     os.environ['PYSPARK_PYTHON'] = sys.executable
     os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
@@ -21,7 +21,6 @@ def main():
         .master("local[1]") \
         .appName("Application Processor") \
         .getOrCreate()
-    sc = spark.sparkContext
 
     df = spark.read.csv("applications/applications_dataset_1.csv", header=True, inferSchema=True)
 
@@ -51,6 +50,8 @@ def main():
     success_df.toPandas().to_csv("success/1.csv", header=True)
     failure_df.toPandas().to_csv("failure/1.csv", header=True)
 
+    spark.stop()
+
 
 if __name__ == "__main__":
-    main()
+    process_applications()
