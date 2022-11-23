@@ -5,7 +5,13 @@ from sklearn import preprocessing, metrics
 
 class Utils:
     def __init__(self):
-        self.X_encoder = preprocessing.OneHotEncoder(sparse=False)
+        # Specify order of categories
+        self.categories = [['low', 'med', 'high', 'vhigh'],
+                           ['2', '3', '4', '5more'],
+                           ['small', 'med', 'big'],
+                           ['low', 'med', 'high'],
+                           ['unacc', 'acc', 'good', 'vgood']]
+        self.X_encoder = preprocessing.OrdinalEncoder(categories=self.categories)
         self.y_encoder = preprocessing.LabelEncoder()
 
     def load_df(self, path):
@@ -31,9 +37,10 @@ class Utils:
         X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.3)
         return X_train, X_test, y_train, y_test
 
-    def evaluate_model(self, model, X_test, y_test):
-        y_pred = model.predict(X_test)
-        accuracy = metrics.accuracy_score(y_test, y_pred)  # tp / total
-        precision = metrics.precision_score(y_test, y_pred, average='weighted')  # tp / (tp + fp)
-        recall = metrics.recall_score(y_test, y_pred, average='weighted')  # tp / (tp + fn)
+    def evaluate_model(self, model, X, y):
+        y_pred = model.predict(X)
+        accuracy = metrics.accuracy_score(y, y_pred)  # tp / total
+        precision = metrics.precision_score(y, y_pred, average='weighted')  # tp / (tp + fp)
+        recall = metrics.recall_score(y, y_pred, average='weighted')  # tp / (tp + fn)
+
         print(f'Accuracy {accuracy}, Precision {precision}, Recall {recall}')
